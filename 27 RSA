@@ -1,0 +1,53 @@
+#include <stdio.h>
+#include <stdint.h>
+
+#define ALPHABET_SIZE 26
+
+// Function to perform modular exponentiation
+uint64_t mod_exp(uint64_t base, uint64_t exp, uint64_t mod) {
+    uint64_t result = 1;
+    base = base % mod;
+    while (exp > 0) {
+        if (exp % 2 == 1) {
+            result = (result * base) % mod;
+        }
+        exp = exp >> 1;
+        base = (base * base) % mod;
+    }
+    return result;
+}
+
+// Encrypt a character using RSA
+uint64_t rsa_encrypt(uint64_t plaintext, uint64_t e, uint64_t n) {
+    return mod_exp(plaintext, e, n);
+}
+
+// Decrypt using brute force attack
+void brute_force_decrypt(uint64_t ciphertext, uint64_t e, uint64_t n) {
+    for (uint64_t i = 0; i < ALPHABET_SIZE; i++) {
+        if (rsa_encrypt(i, e, n) == ciphertext) {
+            printf("Ciphertext %llu corresponds to plaintext character %c\n", ciphertext, 'A' + i);
+            return;
+        }
+    }
+    printf("Decryption failed for ciphertext %llu\n", ciphertext);
+}
+
+int main() {
+    // Example RSA parameters (small for demonstration purposes)
+    uint64_t n = 3233; // Example modulus (p=61, q=53)
+    uint64_t e = 17;   // Example public exponent
+
+    // Encrypt each character
+    for (uint64_t i = 0; i < ALPHABET_SIZE; i++) {
+        uint64_t ciphertext = rsa_encrypt(i, e, n);
+        printf("Character %c encrypted to ciphertext %llu\n", 'A' + i, ciphertext);
+    }
+
+    // Demonstrate brute force decryption
+    uint64_t example_ciphertext = rsa_encrypt(4, e, n); // Encrypt 'E' which is 4
+    printf("Brute force decryption attempt:\n");
+    brute_force_decrypt(example_ciphertext, e, n);
+
+    return 0;
+}
